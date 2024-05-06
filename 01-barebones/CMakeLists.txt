@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.17.0)
 # prevent cmake from making test executables??
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
-project(OSDEV)
-
 # set up i686-elf cross-compiler tools
 include(toolchain-i686-elf.cmake)
+
+project(OSDEV)
 
 # enable assembly
 enable_language(ASM)
