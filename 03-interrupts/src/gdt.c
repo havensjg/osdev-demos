@@ -10,7 +10,7 @@ void gdt_set(uint16_t seg, uint32_t off, uint32_t lim, uint8_t access, uint8_t f
 
     gdt[ent][0] = lim & 0xff;
     gdt[ent][1] = (lim >> 8) & 0xff;
-    gdt[ent][7] = (lim >> 16) & 0xf;
+    gdt[ent][6] = (lim >> 16) & 0xf;
 
     gdt[ent][2] = off & 0xff;
     gdt[ent][3] = (off>>8) & 0xff;
