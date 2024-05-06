@@ -1,4 +1,5 @@
 #include <interrupt.h>
+#include <pit.h>
 #include <stdio.h>
 #include <terminal.h>
 
@@ -18,16 +19,36 @@
 	Expected initial state:
 		- Interrupts disabled
 */
-void kernel_main(void) 
-{
-	const char *str = "Hello world";
-
+void kernel_main(void) {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	/* Initialize IDT */
+	/* Initialize IDT and re-map IRQs */
 	interrupt_init();
+
+	/* Initialize Programmable Interrupt Timer */
+	pit_init();
+
+	/* Reload IDT and enable interrupts */
+	interrupt_load_idt();
+	interrupt_enable();
 
 	/* Print some things on the screen */
 	printf("Hello, kernel World!\n");
+
+	/* PIT interrupt counter */
+	int count = 0;
+
+	/* Infinite loop waiting for and processing interrupts */
+	while (1) {
+		/* check if PIT interrupt occurred */
+		if (pit_occurred) {
+			pit_occurred = 0;
+			count++;
+			printf("PIT %d\n", count);
+		}
+
+		/* wait for next interrupt */
+		interrupt_wait();
+	}
 }

@@ -1,5 +1,6 @@
 #include <gdt.h>
 #include <interrupt.h>
+#include <pic.h>
 
 /* Interrupt Descriptor Table */
 idt_entry_t interrupt_idt[INTERRUPT_MAX + 1];
@@ -18,6 +19,14 @@ void interrupt_init(void) {
     interrupt_idtr.offset = interrupt_idt;
     interrupt_idtr.size = sizeof(interrupt_idt);
     interrupt_load_idt();
+
+    /* re-map PIC */
+    pic_remap(INTERRUPT_IRQ_BASE, INTERRUPT_IRQ_BASE + 8);
+}
+
+/* Install external IRQ handler */
+void interrupt_install_irq(int irq, void *handler) {
+    interrupt_set(INTERRUPT_IRQ_BASE + irq, GDT_KERNEL_CS, handler, IDT_PRESENT | IDT_32BIT_INTERRUPT);
 }
 
 /* 
@@ -46,7 +55,7 @@ void interrupt_set(uint8_t num, uint16_t sel, void *off, uint8_t attr) {
 
     interrupt_idt[num].attributes = attr;
     interrupt_idt[num].offset_hi = loff >> 16;
-    interrupt_idt[num].offset_lo = loff && 0xffff;
+    interrupt_idt[num].offset_lo = loff & 0xffff;
     interrupt_idt[num].selector = sel;
     interrupt_idt[num].zero = 0;
 }

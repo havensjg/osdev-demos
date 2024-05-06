@@ -17,7 +17,8 @@
 #define IDT_32BIT_INTERRUPT IDT_GATE_TYPE(0xe)
 #define IDT_32BIT_TRAP IDT_GATE_TYPE(0xf)
 
-#define INTERRUPT_MAX 0xFF
+#define INTERRUPT_IRQ_BASE 0x70
+#define INTERRUPT_MAX      0xFF
 
 /* Structure of each entry in the IDT */
 struct s_idt_entry {
@@ -38,11 +39,20 @@ struct s_idtr {
 
 typedef struct s_idtr idtr_t;
 
+/* Disable interrupts (CLI) */
+void interrupt_disable(void);
+
 /* Dummy ISR. Returns and does nothing */
 void interrupt_dummy_isr(void);
 
+/* Enable interrupts (STI) */
+void interrupt_enable(void);
+
 /* Initialize IDT */
 void interrupt_init(void);
+
+/* Install external IRQ handler */
+void interrupt_install_irq(int irq, void *handler);
 
 /* Loads the IDTR register */
 void interrupt_load_idt(void);
@@ -62,10 +72,13 @@ void interrupt_load_idt(void);
         IDT_32BIT_TRAP
 
         privilege levels:
-        DPL0
-        DPL1
-        DPL2
-        DPL3
+        IDT_DPL0
+        IDT_DPL1
+        IDT_DPL2
+        IDT_DPL3
 
 */
 void interrupt_set(uint8_t num, uint16_t sel, void *off, uint8_t attr);
+
+/* Wait for the next external interrupt (HLT) */
+void interrupt_wait(void);

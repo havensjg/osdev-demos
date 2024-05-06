@@ -51,3 +51,8 @@ static inline uint32_t inl(uint16_t port)
                    : "Nd"(port) );
     return ret;
 }
+
+/* Waits 1-4 us by writing to port 0x80 */
+static inline void io_wait(void) {
+    outb(0x80,0); 
+}
