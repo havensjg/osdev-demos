@@ -1,0 +1,1 @@
+This is a direct adaptation of the [C Bare Bones tutorial on the OsDev Wiki](https://wiki.osdev.org/Bare_Bones)
