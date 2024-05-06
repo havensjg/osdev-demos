@@ -2,6 +2,7 @@
 #include <string.h>
 
 /* driver headers */
+#include <io.h>
 #include <terminal.h>
 #include <vga.h>
 
@@ -24,9 +25,18 @@ void terminal_initialize(void)
 	}
 }
  
-void terminal_setcolor(uint8_t color) 
+void terminal_set_color(uint8_t color) 
 {
 	terminal_color = color;
+}
+
+void terminal_set_cursor(unsigned int x, unsigned int y) {
+	uint16_t pos = y * VGA_WIDTH + x;
+	
+	outb(VGA_CRTC_INDEX, VGA_CRTC_REG_CURSOR_POS_LOW);
+	outb(VGA_CRTC_DATA, (uint8_t)(pos & 0xff));
+	outb(VGA_CRTC_INDEX, VGA_CRTC_REG_CURSOR_POS_HIGH);
+	outb(VGA_CRTC_DATA, (uint8_t)((pos >> 8) & 0xff));
 }
  
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) 
@@ -43,6 +53,7 @@ void terminal_putchar(char c)
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
 	}
+	terminal_set_cursor(terminal_column, terminal_row);
 }
  
 void terminal_write(const char* data, size_t size) 

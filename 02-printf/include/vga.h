@@ -2,8 +2,17 @@
 
 #include <stdint.h>
 
+/* Dimensions of the text mode screen*/
 #define VGA_WIDTH  80
 #define VGA_HEIGHT 25
+
+/* VGA IO Ports */
+#define VGA_CRTC_INDEX 0x3D4
+#define VGA_CRTC_DATA  0x3D5
+
+/* CRTC register indices */
+#define VGA_CRTC_REG_CURSOR_POS_HIGH 0x0E
+#define VGA_CRTC_REG_CURSOR_POS_LOW  0x0F
 
 /* Hardware text mode color constants. */
 enum vga_color {
