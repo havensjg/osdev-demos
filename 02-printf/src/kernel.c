@@ -21,6 +21,7 @@ void kernel_main(void)
 	/* Print some things on the screen */
 	printf("Hello, kernel World!\n");
 	printf("The number 64 in decimal and hex: %u %x\n",64,64);
+	printf("The number 64 in octal: %o\n",64);
 	printf("The number -64: %d\n",-64);
 	printf("A string from somewhere: %s\n",str);
 	printf("The pointer to the string above: %p\n",str);

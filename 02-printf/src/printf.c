@@ -100,31 +100,57 @@ int printf(const char* restrict format, ...) {
 
                 written += print_number(u);
 				break;
-			case 'o': 
-                // unsigned octal
+			case 'o':  // unsigned octal
+                {
+                    uint32_t v = va_arg(parameters, uint32_t);
+                    int s = 33; // must be a multiple of 3. It is ok for this to be >32 since the >> operator doesn't care
+                    uint32_t v2 = 0;
+
+                    do {
+                        s-=3;
+                        v2 = v >> s;
+                        v2 &= 0x7;
+                    } while (v2 == 0 && s>=0); // skip leading zeros
+                    if (s < 0) {
+                        print(hex_chars,1); // 0
+                        written++;
+                    }
+                    while (s >= 0) {
+                        uint32_t v2 = v >> s;
+                        v2 &= 0x7;
+                        putchar('0' + v2);
+                        written++;
+                        s-=3;
+                    }
+                }
 				break;
 			case 'p': // pointer
 			case 'x': // unsigned hex
 				hex_chars = HEX_LOWERCASE;
 				__attribute__((fallthrough));
 			case 'X': // unsigned hex uppercase
-				if (!hex_chars) hex_chars = HEX_UPPERCASE;
-				uint32_t v = va_arg(parameters, uint32_t);
-				int s = 32;
-                uint32_t v2 = 0;
+                {
+                    if (!hex_chars) hex_chars = HEX_UPPERCASE;
+                    uint32_t v = va_arg(parameters, uint32_t);
+                    int s = 32;
+                    uint32_t v2 = 0;
 
-                do {
-                    s-=4;
-                    v2 = v >> s;
-                    v2 &= 0xf;
-                } while (v2 == 0 && s>=0); // skip leading zeros
-                if (s < 0) print(hex_chars,1); // 0
-                while (s >= 0) {
-                    uint32_t v2 = v >> s;
-                    v2 &= 0xf;
-                    print(hex_chars+v2,1);
-                    written++;
-                    s-=4;
+                    do {
+                        s-=4;
+                        v2 = v >> s;
+                        v2 &= 0xf;
+                    } while (v2 == 0 && s>=0); // skip leading zeros
+                    if (s < 0) {
+                        print(hex_chars,1); // 0
+                        written++;
+                    }
+                    while (s >= 0) {
+                        uint32_t v2 = v >> s;
+                        v2 &= 0xf;
+                        print(hex_chars+v2,1);
+                        written++;
+                        s-=4;
+                    }
                 }
 				break;
 			case 'f':
