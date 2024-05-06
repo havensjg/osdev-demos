@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+/* x86 outb instruction */
 static inline void outb(uint16_t port, uint8_t val)
 {
     asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
@@ -9,6 +10,7 @@ static inline void outb(uint16_t port, uint8_t val)
      * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
 }
 
+/* x86 inb instruction */
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
@@ -18,11 +20,13 @@ static inline uint8_t inb(uint16_t port)
     return ret;
 }
 
+/* x86 outw instruction */
 static inline void outw(uint16_t port, uint16_t val)
 {
     asm volatile ( "outw %0, %1" : : "a"(val), "Nd"(port) );
 }
 
+/* x86 inw instruction */
 static inline uint16_t inw(uint16_t port)
 {
     uint16_t ret;
@@ -32,11 +36,13 @@ static inline uint16_t inw(uint16_t port)
     return ret;
 }
 
+/* x86 outl instruction */
 static inline void outl(uint16_t port, uint32_t val)
 {
     asm volatile ( "outl %0, %1" : : "a"(val), "Nd"(port) );
 }
 
+/* x86 inl instruction */
 static inline uint32_t inl(uint16_t port)
 {
     uint32_t ret;

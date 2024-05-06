@@ -10,12 +10,14 @@
 const char *HEX_LOWERCASE = "0123456789abcdef";
 const char *HEX_UPPERCASE = "0123456789ABCDEF";
 
+/* Print a single character */
 int putchar(int ic) {
 	char c = (char) ic;
 	terminal_write(&c, sizeof(c));
 	return ic;
 }
 
+/* Print a string of a given length */
 static int print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
@@ -50,6 +52,7 @@ static int print_number(unsigned int v) {
     return l;
 }
 
+/* Print a formatted string */
 int printf(const char* restrict format, ...) {
 	va_list parameters;
 	va_start(parameters, format);

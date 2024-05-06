@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <string.h>
- 
+
+/* Move memory */
 void* memmove(void* dstptr, const void* srcptr, size_t size) {
 	unsigned char* dst = (unsigned char*) dstptr;
 	const unsigned char* src = (const unsigned char*) srcptr;
@@ -14,6 +15,7 @@ void* memmove(void* dstptr, const void* srcptr, size_t size) {
 	return dstptr;
 }
 
+/* Get length of a null-terminated string */
 size_t strlen(const char* str) 
 {
 	size_t len = 0;

@@ -34,11 +34,13 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
+/* Create a VGA text-mode attribute byte */
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
 {
 	return fg | bg << 4;
 }
- 
+
+/* Create a VGA text-mode character-attribute pair */
 static inline uint16_t vga_entry(unsigned char uc, uint8_t color) 
 {
 	return (uint16_t) uc | (uint16_t) color << 8;
