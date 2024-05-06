@@ -79,6 +79,17 @@ _start:
 	call gdt_init
 	lgdt (gdt_gdtr)
 
+	/* Load CS */
+	jmp $0x8,$start_reload_cs
+start_reload_cs:
+	/* Load DS, ES, FS, GS, SS */
+	mov $0x10,%ax
+	mov %ax,%ds
+	mov %ax,%es
+	mov %ax,%fs
+	mov %ax,%gs
+	mov %ax,%ss
+
 	/*
 	Enter the high-level kernel. The ABI requires the stack is 16-byte
 	aligned at the time of the call instruction (which afterwards pushes

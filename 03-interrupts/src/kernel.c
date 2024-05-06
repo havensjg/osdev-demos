@@ -1,3 +1,4 @@
+#include <interrupt.h>
 #include <stdio.h>
 #include <terminal.h>
 
@@ -10,7 +11,13 @@
 #if !defined(__i386__)
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
- 
+
+/* 
+	Kernel entry point.
+
+	Expected initial state:
+		- Interrupts disabled
+*/
 void kernel_main(void) 
 {
 	const char *str = "Hello world";
@@ -18,12 +25,9 @@ void kernel_main(void)
 	/* Initialize terminal interface */
 	terminal_initialize();
 
+	/* Initialize IDT */
+	interrupt_init();
+
 	/* Print some things on the screen */
 	printf("Hello, kernel World!\n");
-	printf("The number 64 in decimal and hex: %u %x\n",64,64);
-	printf("The number 64 in octal: %o\n",64);
-	printf("The number -64: %d\n",-64);
-	printf("A string from somewhere: %s\n",str);
-	printf("The pointer to the string above: %p\n",str);
-	printf("A character: %c\n",'\x02'); // should show up as a smiley face
 }
