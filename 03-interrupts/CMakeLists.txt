@@ -50,7 +50,7 @@ file(GLOB C_SOURCES
     "include/*.h"
     "src/*.c"
     )
-set_source_files_properties(${C_SOURCES} PROPERTIES COMPILE_OPTIONS "-std=gnu99;-ffreestanding;-O2;-Wall;-Wextra")
+set_source_files_properties(${C_SOURCES} PROPERTIES COMPILE_OPTIONS "-g;-std=gnu99;-ffreestanding;-O2;-Wall;-Wextra")
 
 file (GLOB ASM_SOURCES
     "src/*.s"
