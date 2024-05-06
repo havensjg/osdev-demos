@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 void terminal_initialize(void);
+void terminal_scroll(void);
 void terminal_set_color(uint8_t color);
 void terminal_set_cursor(unsigned int x, unsigned int y);
 void terminal_putchar(char c);
