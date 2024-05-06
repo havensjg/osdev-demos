@@ -47,12 +47,26 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
  
 void terminal_putchar(char c) 
 {
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
+	/* handle \n (newline) specially */
+	if (c == '\n') {
+		/* reset cursor back to left side of the new line */
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+		terminal_row++;
+	} else {
+		/* put character on screen */
+		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+
+		/* wrap to next line */
+		if (++terminal_column == VGA_WIDTH) {
+			terminal_column = 0;
+			
+			/* wrap around to top */
+			if (++terminal_row == VGA_HEIGHT)
+				terminal_row = 0;
+		}
 	}
+
+	/* move cursor to position of the next character */
 	terminal_set_cursor(terminal_column, terminal_row);
 }
  
