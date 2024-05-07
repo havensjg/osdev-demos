@@ -27,7 +27,7 @@ void kernel_main(void) {
 	interrupt_init();
 
 	/* Initialize Programmable Interrupt Timer */
-	pit_init();
+	pit_init(8000);
 
 	/* Reload IDT and enable interrupts */
 	interrupt_load_idt();
@@ -36,16 +36,30 @@ void kernel_main(void) {
 	/* Print some things on the screen */
 	printf("Hello, kernel World!\n");
 
-	/* PIT interrupt counter */
-	int count = 0;
+	/* Counters */
+	int eighths = 0;
+	int millis = 0;
 
 	/* Infinite loop waiting for and processing interrupts */
 	while (1) {
 		/* check if PIT interrupt occurred */
 		if (pit_occurred) {
+			/* clear the flag */
 			pit_occurred = 0;
-			count++;
-			printf("PIT %d\n", count);
+
+			/* increment count */
+			eighths++;
+
+			/* roll over to millis */
+			if (eighths == 8) {
+				millis++;
+				eighths = 0;
+			}
+
+			/* every second */
+			if (millis % 1000 == 0 && eighths == 0) {
+				printf("Seconds: %d\n",millis / 1000);
+			}
 		}
 
 		/* wait for next interrupt */
