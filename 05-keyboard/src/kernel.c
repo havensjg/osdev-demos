@@ -71,7 +71,7 @@ void kernel_main(void) {
 					/* key code is a press of a key that can be typed on screen */
 
 					/* backspace */
-					if (b == 0x66) {
+					if (b == KEY_BACKSPACE) {
 						terminal_backspace();
 					} else {
 						/* not backspace */
