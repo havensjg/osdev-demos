@@ -1,10 +1,10 @@
-.global irq0_wrap
+.global irq1_wrap
 .align 4
-.type irq0_wrap, @function
-irq0_wrap:
+.type irq1_wrap, @function
+irq1_wrap:
     pushal
     cld
-    call pit_irq
+    call keyboard_irq
     popal
     iret
-.size irq0_wrap, . - irq0_wrap
+.size irq1_wrap, . - irq1_wrap
