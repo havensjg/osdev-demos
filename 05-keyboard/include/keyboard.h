@@ -38,6 +38,9 @@ void keyboard_init(void);
 /* Read the key code from the keyboard queue */
 uint8_t keyboard_read(void);
 
+/* Convert a keycode to ASCII. Returns 0 when no ASCII code maps to the key */
+char keyboard_to_ascii(uint8_t code);
+
 /* Check if an interrupt occurred and handle it. Returns 1 if there are codes in the queue to read */
 int keyboard_update(void);
 

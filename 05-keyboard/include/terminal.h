@@ -3,6 +3,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/* Erases a character from the screen and backs up the cursor*/
+void terminal_backspace(void);
+
 /* Initialize the terminal output */
 void terminal_initialize(void);
 
