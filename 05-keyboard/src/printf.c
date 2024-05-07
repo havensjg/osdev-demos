@@ -34,7 +34,12 @@ static int print_number(unsigned int v) {
         if (v > 0) {
             buf[i] = '0' + (v % 10);
         } else {
-            buf[i] = 0;
+            if (i != 0) {
+				buf[i] = 0;
+			} else {
+				// v was zero, special case
+				buf[i] = '0';
+			}
         }
         v /= 10;
     }
