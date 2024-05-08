@@ -191,6 +191,22 @@ int pgalloc_init(void) {
     return 0;
 }
 
+/* Print current state of the page allocator system */
+void pgalloc_print_diagnostics(void) {
+    printf(" free blocks: <");
+
+    pgalloc_free_block_t *blk = pgalloc_free_head;
+    while (blk != NULL) {
+        printf("%x:%d",blk->base,blk->len);
+        if (blk->next != NULL) {
+            printf(",");
+        }
+
+        blk = blk->next;
+    }
+    printf(">\n");
+}
+
 /* Register a multi-page allocation in the list of multi-page allocations */
 int pgalloc_register_multipage(uint32_t base, uint32_t pages) {
     /* Search for an empty entry in the list */

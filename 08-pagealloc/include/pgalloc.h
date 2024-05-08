@@ -51,6 +51,9 @@ pgalloc_free_block_t *pgalloc_alloc_free_block();
 /* Initialize the page allocator. Returns non-zero if not successful */
 int pgalloc_init(void);
 
+/* Print current state of the page allocator system */
+void pgalloc_print_diagnostics(void);
+
 /* Register a multi-page allocation in the list of multi-page allocations */
 int pgalloc_register_multipage(uint32_t base, uint32_t pages);
 
