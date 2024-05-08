@@ -242,13 +242,46 @@ void pgfree(void *ptr) {
         }
     }
 
-    /* TODO: Shortcut: this allocation is right at the end of a free block */
-    pgalloc_free_block_t *blk = NULL;
+    pgalloc_free_block_t *blk = pgalloc_free_head;
 
-    /* TODO: Shortcut: this allocation is right at the beginning of a free block */
+    /* Shortcut: this allocation is right at the end of a free block */
+    /* Note: when this loop exits, blk should be NULL if the shortcut wasn't taken, and will hold the pointer to the expanded block if the shortcut was taken */
+    while (blk != NULL) {
+        uint32_t block_end = blk->base + (blk->len * 0x1000);
+
+        /* The block to free is on the end of this free block */
+        if (base == block_end) {
+            printf("pgfree: adjacent after\n");
+            blk->len += pages;
+            /* leave blk with the pointer to the expanded block */
+            break;
+        } else {
+            /* next in list */
+            blk = blk->next;
+        }
+    }
+
+    /* Shortcut: this allocation is right at the beginning of a free block */
+    if (blk == NULL) {
+        while (blk != NULL) {
+            uint32_t block_end = base + (pages * 0x1000);
+
+            /* The block to free is at the beginning of this free block */
+            if (blk->base == block_end) {
+                printf("pgfree: adjacent before\n");
+                blk->base = base;
+                blk->len += pages;
+
+                /* leave blk with the pointer to the expanded block */
+                break;
+            }
+        }
+    }
 
     /* Not either shortcut case: make a new entry in the free block list */
     if (blk == NULL) {
+        printf("pgfree: non-adjacent\n");
+
         /* New free block list entry */
         blk = pgalloc_alloc_free_block();
         if (blk == NULL) {
@@ -260,16 +293,16 @@ void pgfree(void *ptr) {
         blk->base = base;
         blk->len = pages;
         blk->next = NULL;
-    }
 
-    /* Add to the list */
-    if (blk != NULL) {
-        if (pgalloc_free_head == NULL) {
-            pgalloc_free_head = blk;
-        } else {
-            pgalloc_free_tail->next = blk;
+        /* Add to the list */
+        if (blk != NULL) {
+            if (pgalloc_free_head == NULL) {
+                pgalloc_free_head = blk;
+            } else {
+                pgalloc_free_tail->next = blk;
+            }
+            pgalloc_free_tail = blk;
         }
-        pgalloc_free_tail = blk;
     }
 
     /* TODO: Merge if this makes the block adjacent to any others */
