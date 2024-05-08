@@ -206,3 +206,55 @@ int pgalloc_register_multipage(uint32_t base, uint32_t pages) {
     printf("pgalloc_register_multipage: no free entries in the multipage list\n");
     return 1;
 }
+
+/* Free a page allocation */
+void pgfree(void *ptr) {
+    uint32_t pages = 1;
+    uint32_t base = (uint32_t) ptr;
+
+    /* Check if it's multipage. If it's not in the list, it's one page */
+    for (int i=0; i<PGALLOC_MULTIPAGE_LIST_SIZE; i++) {
+        /* Check if base matches */
+        if (pgalloc_multipage_list[i].base == base) {
+            /* Retrieve page count */
+            pages = pgalloc_multipage_list[i].pages;
+            
+            /* Mark as unused */
+            pgalloc_multipage_list[i].base = 0;
+            pgalloc_multipage_list[i].pages = 0;
+            break;
+        }
+    }
+
+    /* TODO: Shortcut: this allocation is right at the end of a free block */
+    pgalloc_free_block_t *blk = NULL;
+
+    /* TODO: Shortcut: this allocation is right at the beginning of a free block */
+
+    /* Not either shortcut case: make a new entry in the free block list */
+    if (blk == NULL) {
+        /* New free block list entry */
+        blk = pgalloc_alloc_free_block();
+        if (blk == NULL) {
+            printf("pgfree: unable to allocate free block list entry\n");
+            return;
+        }
+
+        /* Fill in the list entry */
+        blk->base = base;
+        blk->len = pages;
+        blk->next = NULL;
+    }
+
+    /* Add to the list */
+    if (blk != NULL) {
+        if (pgalloc_free_head == NULL) {
+            pgalloc_free_head = blk;
+        } else {
+            pgalloc_free_tail->next = blk;
+        }
+        pgalloc_free_tail = blk;
+    }
+
+    /* TODO: Merge if this makes the block adjacent to any others */
+}

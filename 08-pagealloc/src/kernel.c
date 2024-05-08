@@ -32,15 +32,26 @@ void kernel_main(void)
 	}
 
 	/* Test the page allocator */
-	void *page = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page);
+	void *page1 = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page1);
 
-	page = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page);
+	void *page2 = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page2);
 
-	page = pgalloc(10);
-	printf("Allocated 10 pages: %p\n",page);
+	void *page3 = pgalloc(10);
+	printf("Allocated 10 pages: %p\n",page3);
 
-	page = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page);
+	void *page4 = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page4);
+
+	/* Free non-contiguous allocations. Each should create a new entry in the free block list. */
+	pgfree(page1);
+	pgfree(page3);
+
+	/* Now allocate a page and see where it ends up */
+	void *page5 = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page5);
+
+	/* Free page2, which is now between two freed fragments. pgfree should merge them together. */
+	pgfree(page2);
 }

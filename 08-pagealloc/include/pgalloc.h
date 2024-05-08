@@ -53,3 +53,6 @@ int pgalloc_init(void);
 
 /* Register a multi-page allocation in the list of multi-page allocations */
 int pgalloc_register_multipage(uint32_t base, uint32_t pages);
+
+/* Free a page allocation */
+void pgfree(void *ptr);
