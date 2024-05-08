@@ -272,7 +272,7 @@ struct multiboot_color
   multiboot_uint8_t blue;
 };
 
-
+extern multiboot_info_t *multiboot_info;
 
 #endif /* ! ASM_FILE */
 
