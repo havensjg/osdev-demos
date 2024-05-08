@@ -5,10 +5,63 @@
 #include <multiboot.h>
 #include <pgalloc.h>
 
+/* Free block linked list */
 pgalloc_free_block_t *pgalloc_free_head = NULL;
 pgalloc_free_block_t *pgalloc_free_tail = NULL;
 
+/* Pool of free block list entries */
 pgalloc_free_block_t pgalloc_free_block_pool[PGALLOC_FREE_BLOCK_POOL_SIZE];
+
+/* List of allocations longer than 1 page */
+pgalloc_multipage_t pgalloc_multipage_list[PGALLOC_MULTIPAGE_LIST_SIZE];
+
+/* Allocate pages. Returns NULL if not successful */
+void *pgalloc(size_t pages) {
+    /* Check argument */
+    if (pages < 1) {
+        printf("pgalloc: tried to allocate less than 1 page\n");
+        return NULL;
+    }
+
+    /* Get first free block */
+    pgalloc_free_block_t *blk = pgalloc_free_head;
+
+    /* Is this block valid? If not, there's none in the list */
+    if (blk == NULL) {
+        printf("pgalloc: no free pages!\n");
+        return NULL;
+    }
+    
+    /* Check for a block of suitable size*/
+    while (blk != NULL && blk->len < pages) {
+        blk = blk->next;
+    }
+
+    /* Check that the block is valid */
+    if (blk == NULL) {
+        printf("pgalloc: no blocks large enough to fill request\n");
+        return NULL;
+    }
+
+    /* Allocate from the end of this block */
+    uint32_t block_end = blk->base + (blk->len * 0x1000);
+    uint32_t allocation = block_end - (pages * 0x1000);
+    blk->len -= pages;
+
+    /* Add to the list of multi-page allocations if necessary */
+    if (pages > 1) {
+        int r = pgalloc_register_multipage(allocation, pages);
+        if (r) {
+            /* Undo allocation */
+            blk->len += pages;
+
+            printf("pgalloc: unable to register multipage allocation\n");
+            return NULL;
+        }
+    }
+
+    return (void *) allocation;
+}
 
 /* Add a block of free memory to the pool. Length in pages. Returns non-zero if not successful */
 int pgalloc_add_free_block(uint32_t base, uint32_t len) {
@@ -72,6 +125,12 @@ int pgalloc_init(void) {
         pgalloc_free_block_pool[i].pool_status = PGALLOC_BLOCK_FREE;
     }
 
+    /* Initialize multipage allocation list */
+    for (int i=0; i<PGALLOC_MULTIPAGE_LIST_SIZE; i++) {
+        pgalloc_multipage_list[i].base = 0;
+        pgalloc_multipage_list[i].pages = 0;
+    }
+
     /* Add free blocks from the bootloader */
     int map_size = multiboot_info->mmap_length / sizeof(multiboot_memory_map_t);
     for (int i=0;i<map_size;i++) {
@@ -130,4 +189,20 @@ int pgalloc_init(void) {
     }
 
     return 0;
+}
+
+/* Register a multi-page allocation in the list of multi-page allocations */
+int pgalloc_register_multipage(uint32_t base, uint32_t pages) {
+    /* Search for an empty entry in the list */
+    for (int i=0; i<PGALLOC_MULTIPAGE_LIST_SIZE; i++) {
+        /* If pages=0 then the list entry is free */
+        if (pgalloc_multipage_list[i].base == 0) {
+            pgalloc_multipage_list[i].base = base;
+            pgalloc_multipage_list[i].pages = pages;
+            return 0;
+        }
+    }
+
+    printf("pgalloc_register_multipage: no free entries in the multipage list\n");
+    return 1;
 }

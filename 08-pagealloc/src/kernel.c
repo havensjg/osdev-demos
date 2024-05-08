@@ -31,5 +31,16 @@ void kernel_main(void)
 		return;
 	}
 
-	/* TODO: Test the page allocator */
+	/* Test the page allocator */
+	void *page = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page);
+
+	page = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page);
+
+	page = pgalloc(10);
+	printf("Allocated 10 pages: %p\n",page);
+
+	page = pgalloc(1);
+	printf("Allocated 1 page: %p\n",page);
 }
