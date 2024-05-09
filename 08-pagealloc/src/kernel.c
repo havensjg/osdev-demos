@@ -34,15 +34,15 @@ void kernel_main(void)
 	/* Test the page allocator */
 	void *page1 = pgalloc(1);
 	printf("Allocated 1 page: %p\n",page1);
-	pgalloc_print_diagnostics();
+	//pgalloc_print_diagnostics();
 
 	void *page2 = pgalloc(1);
 	printf("Allocated 1 page: %p\n",page2);
-	pgalloc_print_diagnostics();
+	//pgalloc_print_diagnostics();
 
 	void *page3 = pgalloc(10);
 	printf("Allocated 10 pages: %p\n",page3);
-	pgalloc_print_diagnostics();
+	//pgalloc_print_diagnostics();
 
 	void *page4 = pgalloc(1);
 	printf("Allocated 1 page: %p\n",page4);
@@ -65,4 +65,15 @@ void kernel_main(void)
 	pgfree(page2);
 	printf("Freed %x\n",page2);
 	pgalloc_print_diagnostics();
+
+	/* Free page5 and page4, which are the last outstanding pages. Should mend the hole between the two free blocks. */
+	pgfree(page5);
+	printf("Freed %x\n",page5);
+	pgalloc_print_diagnostics();
+
+	pgfree(page4);
+	printf("Freed %x\n",page4);
+	pgalloc_print_diagnostics();
+
+	/* And now the free block list should contain only one free block again */
 }

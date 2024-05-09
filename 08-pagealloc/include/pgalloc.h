@@ -48,6 +48,9 @@ int pgalloc_add_free_block(uint32_t base, uint32_t len);
 /* Allocate a free block list entry from the pool. Returns NULL if not successful */
 pgalloc_free_block_t *pgalloc_alloc_free_block();
 
+/* Free a free block list entry */
+void pgalloc_free_free_block(pgalloc_free_block_t *blk);
+
 /* Initialize the page allocator. Returns non-zero if not successful */
 int pgalloc_init(void);
 

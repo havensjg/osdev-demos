@@ -107,6 +107,11 @@ pgalloc_free_block_t *pgalloc_alloc_free_block() {
     return NULL;
 }
 
+/* Free a free block list entry */
+void pgalloc_free_free_block(pgalloc_free_block_t *blk) {
+    blk->pool_status = PGALLOC_BLOCK_FREE;
+}
+
 /* Initialize the page allocator. Returns non-zero if not successful */
 int pgalloc_init(void) {
     /* Get and adjust bounds of kernel. These symbols are from the linker script */
@@ -305,5 +310,71 @@ void pgfree(void *ptr) {
         }
     }
 
-    /* TODO: Merge if this makes the block adjacent to any others */
+    /* Merge if this makes the block adjacent to any others */
+    pgalloc_free_block_t *absorber = pgalloc_free_head;
+
+    while (absorber != NULL) {
+        /* Makes no sense for a block to absorb itself */
+        if (absorber == blk) {
+            absorber = absorber->next;
+            continue;
+        }
+
+        /* Some bounds calculations */
+        uint32_t absorber_begin = absorber->base;
+        uint32_t absorber_end = absorber->base + (absorber->len * 0x1000);
+        uint32_t block_begin = blk->base;
+        uint32_t block_end = blk->base + (blk->len * 0x1000);
+
+        /* Changed block is before the absorber block */
+        int absorbed = 0;
+        if (absorber_begin == block_end) {
+            printf("pgfree: absorb before\n");
+            absorber->base = blk->base;
+            absorber->len = blk->len + absorber->len;
+            absorbed = 1;
+        }
+
+        /* Changed block is after the absorber block */
+        if ((absorbed == 0) && (absorber_end == block_begin)) {
+            printf("pgfree: absorb after\n");
+            absorber->len += blk->len;
+            absorbed = 1;
+        }
+
+        /* Handle absorption */
+        if (absorbed) {
+            /* Removing the head of the list is a special case */
+            if (blk == pgalloc_free_head) {
+                pgalloc_free_head = blk->next;
+            } else {
+                /* Find the previous block to the absorbed block */
+                pgalloc_free_block_t *prev = pgalloc_free_head;
+                while (prev != NULL) {
+                    /* The next block of this block is blk */
+                    if(prev->next == blk) {
+                        break;
+                    }
+
+                    prev = prev->next;
+                }
+
+                /* Something weird happened and the absorbed block is not in the list? */
+                if (prev == NULL) {
+                    printf("pgfree: absorbed block is not in the list\n");
+                    return;
+                }
+
+                /* Remove from list */
+                prev->next = blk->next;
+            }
+
+            /* Free absorbed blk */
+            pgalloc_free_free_block(blk);
+
+            break;
+        }
+        
+        absorber = absorber->next;
+    }
 }
