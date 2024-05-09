@@ -297,17 +297,13 @@ void pgfree(void *ptr) {
         /* Fill in the list entry */
         blk->base = base;
         blk->len = pages;
-        blk->next = NULL;
 
-        /* Add to the list */
-        if (blk != NULL) {
-            if (pgalloc_free_head == NULL) {
-                pgalloc_free_head = blk;
-            } else {
-                pgalloc_free_tail->next = blk;
-            }
+        /* Add to the front of the list. Due to how pgalloc works, this will give priority to previously used memory, which is usually closer in size than the free blocks created in pgalloc_init */
+        if (pgalloc_free_tail == NULL) {
             pgalloc_free_tail = blk;
         }
+        blk->next = pgalloc_free_head;
+        pgalloc_free_head = blk;
     }
 
     /* Merge if this makes the block adjacent to any others */
