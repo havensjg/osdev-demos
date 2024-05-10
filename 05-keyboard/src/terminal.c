@@ -11,30 +11,6 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
-/* Erases a character from the screen and backs up the cursor*/
-void terminal_backspace(void) {
-	/* at the beginning of a row? */
-	if (terminal_column == 0) {
-		/* at the top left? can't backspace anymore */
-		if (terminal_row == 0) {
-			return;
-		} else {
-			/* not on the first row */
-			terminal_row--;
-			terminal_column = VGA_WIDTH - 1;
-		}
-	} else {
-		/* in the middle of a row */
-		terminal_column--;
-	}
-
-	/* erase the character */
-	terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
-
-	/* move cursor to its new position */
-	terminal_set_cursor(terminal_column, terminal_row);
-}
-
 /* Initialize the terminal output */
 void terminal_initialize(void) 
 {
@@ -103,10 +79,7 @@ void terminal_putchar(char c)
 		/* wrap to next line */
 		if (++terminal_column == VGA_WIDTH) {
 			terminal_column = 0;
-			
-			/* wrap around to top */
-			if (++terminal_row == VGA_HEIGHT)
-				terminal_row = 0;
+			terminal_row++;
 		}
 	}
 

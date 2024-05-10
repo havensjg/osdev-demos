@@ -79,10 +79,7 @@ void terminal_putchar(char c)
 		/* wrap to next line */
 		if (++terminal_column == VGA_WIDTH) {
 			terminal_column = 0;
-			
-			/* wrap around to top */
-			if (++terminal_row == VGA_HEIGHT)
-				terminal_row = 0;
+			terminal_row++;
 		}
 	}
 
