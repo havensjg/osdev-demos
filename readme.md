@@ -24,6 +24,8 @@ make livecd
 
 The resulting live CD image will be in `build/myos.iso`
 
+There is also a bash script that runs the above instructions for each demo and places the iso files into a directory named `iso-files`, with each iso file named after the subdirectory it came from.
+
 ### Testing any demo:
 
 Using qemu:
