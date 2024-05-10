@@ -7,7 +7,7 @@ Implements a memory allocation library for smaller amounts of data (8 to 3072 by
 1. The request size is rounded up to the nearest 8 bytes.
 2. If the request is larger than 3072 bytes (0.75 page), the request is forwarded to the page allocator.
 3. The free list is searched for a free block of at least the requested size. First for a block of the exact size, then for the largest free block.
-4. If a block of suitable size is not found, a new block is added to the end of the free list from the page allocator, and the process continues from step 3
+4. If a block of suitable size is not found, a new block is added to the end of the free list from the page allocator.
 5. If the block would have 8 bytes or more remaining after the allocation with header, the free block is resized to the remaining bytes, and the block following is allocated.
 6. If the block does not have at least 8 bytes left, the entire block is used to fill the request.
 

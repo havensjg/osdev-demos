@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+#include <heap.h>
 #include <multiboot.h>
 #include <pgalloc.h>
 #include <terminal.h>
@@ -31,49 +33,43 @@ void kernel_main(void)
 		return;
 	}
 
-	/* Test the page allocator */
-	void *page1 = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page1);
-	//pgalloc_print_diagnostics();
-
-	void *page2 = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page2);
-	//pgalloc_print_diagnostics();
-
-	void *page3 = pgalloc(10);
-	printf("Allocated 10 pages: %p\n",page3);
-	//pgalloc_print_diagnostics();
-
-	void *page4 = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page4);
+	/* Print initial state */
+	heap_print_diagnostics();
 	pgalloc_print_diagnostics();
 
-	/* Free non-contiguous allocations. Each should create a new entry in the free block list. */
-	pgfree(page1);
-	printf("Freed %x\n",page1);
+	/* Allocate some bytes */
+	void *p1 = malloc(64);
+	printf(" malloc(64) gave %p\n",p1);
+	heap_print_diagnostics();
+
+	void *p2 = malloc(16);
+	printf(" malloc(16) gave %p\n",p2);
+	heap_print_diagnostics();
+
+	void *p3 = malloc(1234);
+	printf(" malloc(1234) gave %p\n",p3);
+	heap_print_diagnostics();
+
+	void *pbig = malloc(12345);
+	printf(" malloc(12345) gave %p\n",pbig);
+	heap_print_diagnostics();
 	pgalloc_print_diagnostics();
-	pgfree(page3);
-	printf("Freed %x\n",page3);
+	
+	/* Free one in between */
+	free(p2);
+	heap_print_diagnostics();
+
+	/* Free the first one */
+	free(p1);
+	heap_print_diagnostics();
+
+	/* Free the last one */
+	free(p3);
+	heap_print_diagnostics();
 	pgalloc_print_diagnostics();
 
-	/* Now allocate a page and see where it ends up */
-	void *page5 = pgalloc(1);
-	printf("Allocated 1 page: %p\n",page5);
+	/* Free the big one */
+	free(pbig);
+	heap_print_diagnostics();
 	pgalloc_print_diagnostics();
-
-	/* Free page2, which is now between two freed fragments. pgfree should merge them together. */
-	pgfree(page2);
-	printf("Freed %x\n",page2);
-	pgalloc_print_diagnostics();
-
-	/* Free page5 and page4, which are the last outstanding pages. Should mend the hole between the two free blocks. */
-	pgfree(page5);
-	printf("Freed %x\n",page5);
-	pgalloc_print_diagnostics();
-
-	pgfree(page4);
-	printf("Freed %x\n",page4);
-	pgalloc_print_diagnostics();
-
-	/* And now the free block list should contain only one free block again */
 }
