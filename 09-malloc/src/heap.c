@@ -16,11 +16,56 @@ void free(void *ptr) {
         return;
     }
 
-    /* TODO: Check if adjacent to a free block, if so merge */
     int merged = 0;
     heap_entry_t *blk = (heap_entry_t *)(ptr - sizeof(heap_entry_t));
+    heap_entry_t *merged_blk = heap_free_head;
+    uint32_t blk_begin = (uint32_t) ((void *) blk);
+    uint32_t blk_end = blk_begin + sizeof(heap_entry_t) + blk->size;
+    
+    /* Don't merge blocks across pages */
+    if ((blk_begin & 0xfff) != 0) {
+        /* Check if after a free block, if so merge */
+        while (merged_blk != NULL) {
+            /* Calculate bounds of merged_blk */
+            uint32_t merged_blk_begin = (uint32_t) ((void *) merged_blk);
+            uint32_t merged_blk_end = merged_blk_begin + sizeof(heap_entry_t) + merged_blk->size;
 
-    /* TODO: Is the merged block adjacent to another? Merge */
+            /* blk is after merged_blk */
+            if (blk_begin == merged_blk_end) {
+                printf("free: adjacent after\n");
+                merged_blk->size += sizeof(heap_entry_t) + blk->size;
+                blk = merged_blk;
+                merged = 1;
+                break;
+            }
+
+            merged_blk = merged_blk->next;
+        }
+    }
+
+    merged_blk = heap_free_head;
+    blk_begin = (uint32_t) ((void *) blk);
+    blk_end = blk_begin + sizeof(heap_entry_t) + blk->size;
+
+    /* Don't merge blocks across pages */
+    if ((blk_end & 0xfff) != 0) {
+        /* Check if before a free block, if so merge */
+        while (merged_blk != NULL) {
+            /* Calculate bounds of merged_blk */
+            uint32_t merged_blk_begin = (uint32_t) ((void *) merged_blk);
+
+            /* blk is before merged_blk */
+            if (blk_end == merged_blk_begin) {
+                printf("free: adjacent before\n");
+                blk->size += sizeof(heap_entry_t) + merged_blk->size;
+                heap_remove_free_block(merged_blk);
+                merged = 1;
+                break;
+            }
+
+            merged_blk = merged_blk->next;
+        }
+    }
 
     /* Wasn't merged? Add to the front of the list */
     if (!merged) {
@@ -28,10 +73,11 @@ void free(void *ptr) {
         heap_add_free_block_front(blk);
     }
 
-    /* Check if the merged page is a full page. If so, return to the page allocator */
+    /* Check if the merged block is a full page. If so, return to the page allocator */
     addr = (uint32_t) ((void *)blk);
     if (((addr & 0xfff) == 0) && (blk->size = (4096 - sizeof(heap_entry_t)))) {
         heap_remove_free_block(blk);
+        pgfree(blk);
     }
 }
 

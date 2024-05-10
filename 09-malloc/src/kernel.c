@@ -72,4 +72,6 @@ void kernel_main(void)
 	free(pbig);
 	heap_print_diagnostics();
 	pgalloc_print_diagnostics();
+
+	/* After this, the heap and page allocators should be just like they were when they were initialized */
 }
